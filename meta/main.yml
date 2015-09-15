@@ -13,7 +13,7 @@ galaxy_info:
       - all
    - name: FreeBSD
      versions:
-      - 10
+      - all
   categories:
    - system
    - networking
