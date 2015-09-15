@@ -1,0 +1,65 @@
+#!/bin/sh
+
+# $FreeBSD: $
+#
+# PROVIDE: postfwd2
+# REQUIRE: LOGIN cleanvar
+# KEYWORD: shutdown
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf
+# to enable this service:
+#
+# postfwd2_enable (bool):
+#       Set to "NO" by default.
+#       Set it to "YES" to enable postfwd2.
+# postfwd2_config (path):
+#       Set to /usr/local/etc/postfwd2.cf
+#       by default.
+#
+# Based on the original "postfix-postfwd" initscript
+#
+. /etc/rc.subr
+
+name=postfwd2
+rcvar=postfwd2_enable
+
+load_rc_config $name
+
+: ${postfwd2_enable:="NO"}
+: ${postfwd2_flags="--shortlog --summary=600 --cache=600 --cache-rbl-timeout=3600 --cleanup-requests=1200 --cleanup-rbls=1800 --cleanup-rates=1200"}
+
+pidfile=${postfwd2_pidfile:="/var/run/${name}.pid"}
+required_files=${postfwd2_config:="/usr/local/etc/postfwd.cf"}
+
+command=/usr/local/bin/${name}
+command_args="--daemon --file=${required_files} --pidfile=${pidfile} --interface={{ postfwd2_interface }} --port={{ postfwd2_port }} --user=nobody --group=nobody"
+
+start_precmd="${name}_check"
+status_cmd="${name}_status"
+stop_cmd="${command} -k --pidfile=${pidfile}"
+stop_postcmd="rm -f ${pidfile}"
+extra_commands="reload"
+reload_cmd="${name}_reload"
+
+postfwd2_check() {
+        if [ -f "${postfwd2_pidfile}" ]; then
+                err 1 "${name} is already running."
+        fi
+}
+
+postfwd2_status() {
+        postfwd2_pid=`cat ${pidfile} 2>/dev/null`
+        postfwd2_run=`ps -U nobody | grep -m 1 ${postfwd2_pid} 2>/dev/null`
+        if [ -n "${postfwd2_pid}" -a -n "${postfwd2_run}" ]; then
+                echo "$name is running as ${postfwd2_pid}"
+        else
+                echo "$name is not running"
+        fi
+}
+
+postfwd2_reload() {
+
+        kill -HUP `cat $pidfile`
+}
+
+run_rc_command "$1"

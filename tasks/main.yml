@@ -1,0 +1,43 @@
+# Install and configure postfwd2
+---
+- name: set OS dependent variables
+  tags:
+    - postfwd2
+    - prereq
+  include_vars: "{{ item }}"
+  with_first_found:
+   - "{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml"
+   - "{{ ansible_distribution }}.yml"
+   - "{{ ansible_os_family }}_{{ ansible_distribution_major_version }}.yml"
+   - "{{ ansible_os_family }}.yml"
+   - default.yml
+
+- include: main_redhat.yml
+  when: ansible_os_family == 'RedHat'
+
+- include: main_debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include: main_freebsd.yml
+  when: ansible_distribution == 'FreeBSD'
+
+- name: setup default configuration
+  tags:
+    - postfwd2
+    - files
+  template: > 
+    src={{ postfwd2_policy_template }}
+    dest={{ postfwd2_policy_file }}
+    owner={{ postfwd2_default_owner }}
+    group={{ postfwd2_default_group }}
+    mode=0655
+  notify:
+    - restart postfwd2
+  when: postfwd2_os_supported == True
+
+- name: enable service
+  tags:
+    - postfwd2
+    - configuration
+  service: name={{ postfwd2_service_name }} enabled=yes state=started
+  when: postfwd2_os_supported == True

@@ -1,0 +1,13 @@
+# postfwd2 configuration defaults
+---
+postfwd2_policy_template: "postfwd2.cf.j2"
+postfwd2_policy_file: "/etc/postfwd.cf"
+postfwd2_default_owner: root
+postfwd2_default_group: root
+postfwd2_interface: "127.0.0.1"
+postfwd2_port: "10045"
+postfwd2_policy:
+  DEFAULT:
+    - action=dunno
+postfwd2_os_supported: no
+

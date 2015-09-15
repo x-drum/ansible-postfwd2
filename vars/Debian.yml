@@ -1,0 +1,7 @@
+# Debian Family OS defaults
+---
+postfwd2_package_names: 
+  - postfwd
+postfwd2_service_name: postfwd
+postfwd2_policy_file: /etc/postfix/postfwd.cf
+postfwd2_os_supported: yes

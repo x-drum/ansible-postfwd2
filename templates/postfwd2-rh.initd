@@ -1,0 +1,94 @@
+#!/bin/bash
+#
+# postfwd2      postfwd2 policyd to combine complex restrictions in a ruleset
+#
+# chkconfig: 2345 80 30
+# description: Postfwd2 uses the postfwd2 policy delegation protocol \
+#              to control access to the mail system before a message \
+#              has been accepted.
+# processname: postfwd2
+# pidfile: /var/tmp/postfwd2.pid
+# config: /etc/postfwd.cf
+#
+# Based on startup script from Simon J Mudd <sjmudd@pobox.com>
+# 08/09/2015: First release by Alessio Cassibba (x-drum) <swapon@gmail.com>
+
+### BEGIN INIT INFO
+# Provides: postfwd2
+# Required-Start: $local_fs $network $remote_fs
+# Required-Stop: $local_fs $network $remote_fs
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: start and stop postfwd2 policyd
+# Description: postfwd2 policyd to combine complex restrictions in a ruleset 
+### END INIT INFO
+
+. /etc/rc.d/init.d/functions
+. /etc/sysconfig/network
+
+RETVAL=0
+prog="postfwd2"
+lockfile=/var/lock/subsys/$prog
+pidfile=/var/tmp/postfwd2.pid
+config=/etc/postfwd.cf
+POSTFWD2_ARGS="--shortlog --summary=21600 --cache=600 --cache-rbl-timeout=3600 --cleanup-requests=1200 --cleanup-rbls=1800 --cleanup-rates=1200"
+POSTFWD2_USER=nobody
+POSTFWD2_GROUP=nobody
+POSTFWD2_ADDRESS={{ postfwd2_interface }}
+POSTFWD2_PORT={{ postfwd2_port }}
+
+status -p $pidfile -l $(basename $lockfile) -b $prog >/dev/null 2>&1
+running=$?
+
+conf_check() {
+    [ -x /usr/local/bin/postfwd2 ] || exit 5
+    [ -f /etc/postfwd.cf ] || exit 6
+}
+
+start() {
+        [ "$EUID" != "0" ] && exit 4
+        [ ${NETWORKING} = "no" ] && exit 1
+        conf_check
+        echo -n $"Starting postfwd2: "
+        /usr/local/bin/postfwd2 ${POSTFWD2_ARGS} --daemon --file=${config} --interface=${POSTFWD2_ADDRESS} --port=${POSTFWD2_PORT} --user=${POSTFWD2_USER} --group=${POSTFWD2_GROUP} --pidfile=${pidfile} 2>/dev/null 1>&2 && success || failure $"$prog start"
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && touch $lockfile
+        echo
+        return $RETVAL
+}
+
+stop() {
+        [ "$EUID" != "0" ] && exit 4
+        conf_check
+        echo -n $"Shutting down postfwd2: "
+        killproc -p $pidfile $prog
+        RETVAL=$?
+        [ $RETVAL -eq 0 ] && rm -f $lockfile $pidfile
+        echo
+        return $RETVAL
+}
+
+case "$1" in
+  start)
+        [ $running -eq 1 ] && exit 0
+        start
+        ;;
+  stop)
+        [ $running -eq 1 ] || exit 0
+        stop
+        ;;
+  restart|force-reload)
+        stop
+        start
+        ;;
+  condrestart)
+        [ $running -eq 1 ] || exit 0
+        stop
+        start
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|condrestart}"
+        exit 2
+esac
+
+exit $?

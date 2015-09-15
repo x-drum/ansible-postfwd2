@@ -1,0 +1,20 @@
+## postfwd2 Debian tasks
+---
+- name: install packages for Debian
+  tags:
+    - postfwd2
+    - packages
+  apt: pkg={{item}} state=present
+  with_items: postfwd2_package_names
+
+- name: enable startup for Debian
+  tags:
+    - postfwd2
+    - packages
+  lineinfile: dest=/etc/default/postfwd regexp={{ item.regexp }} line={{ item.line }}
+  with_items: 
+    - { regexp: '^STARTUP=', line: 'STARTUP=1' }
+    - { regexp: '^INET=', line: 'INET={{ postfwd2_interface }}' }
+    - { regexp: '^PORT=', line: 'PORT={{ postfwd2_port }}' }
+  notify: 
+    - restart postfwd2

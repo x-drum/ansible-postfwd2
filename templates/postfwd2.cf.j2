@@ -1,0 +1,8 @@
+## {{ ansible_managed }}
+
+{% for p in postfwd2_policy|sort() %}
+id={{ p }}
+{% for r in postfwd2_policy[p] %}
+  {{ r }}
+{% endfor %}
+{% endfor %}

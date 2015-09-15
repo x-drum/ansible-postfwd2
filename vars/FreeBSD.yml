@@ -1,0 +1,18 @@
+# FreeBSD Family OS defaults
+---
+postfwd2_default_group: wheel
+postfwd2_package_names: 
+  - p5-Net-Server
+  - p5-Socket6
+  - perl5
+  - p5-IO-Multiplex
+  - p5-Net-DNS
+  - p5-Digest-HMAC
+  - p5-IO-Socket-INET6
+  - p5-Time-HiRes
+  - p5-Storable
+postfwd2_service_name: postfwd2
+postfwd2_bin: /usr/local/bin/postfwd2
+postfwd2_sym: /usr/local/bin/postfwd
+postfwd2_policy_file: /usr/local/etc/postfwd.cf
+postfwd2_os_supported: yes

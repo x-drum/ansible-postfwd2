@@ -1,0 +1,11 @@
+# RedHat Family OS defaults
+---
+postfwd2_package_names: 
+  - perl-Net-Server
+  - perl-Net-DNS
+  - perl-IO-Multiplex
+  - perl-prefork
+postfwd2_service_name: postfwd2
+postfwd2_bin: /usr/local/bin/postfwd2
+postfwd2_sym: /usr/local/bin/postfwd
+postfwd2_os_supported: yes

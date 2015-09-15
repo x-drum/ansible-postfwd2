@@ -1,0 +1,7 @@
+# handlers for postfwd2
+---
+- name: restart postfwd2
+  tags: 
+    - postfwd2
+    - configuration
+  service: name={{ postfwd2_service_name }} state=restarted

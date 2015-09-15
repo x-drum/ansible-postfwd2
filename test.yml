@@ -1,0 +1,24 @@
+## test playbook for postfwd2
+---
+- name: test playbook for postfwd2
+  remote_user: root
+  hosts: all
+  sudo: no
+  vars:
+    postfwd2_policy:
+      00_deny_origin_eq_recipient:
+        - sender==$$recipient
+        - action=REJECT not allowed (o==s)
+      01_allow_printers:
+        - client_address=10.2.1.0/24
+        - sender=printer[0-9]@lan
+        - action=dunno
+      02_allow_internal_wiki_to_our_domain:
+        - client_address=10.1.2.3/32
+        - recipient_domain=my.domain.tld
+        - sender=wiki-internal@my.domain.tld
+        - action=dunno
+      DEFAULT:
+        - action=REJECT not allowed
+  roles:
+    - { role: 'postfwd2' }
