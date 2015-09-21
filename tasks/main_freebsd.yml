@@ -7,6 +7,13 @@
   pkgng: pkg={{item}} state=present
   with_items: postfwd2_package_names
 
+- name: check postfwd2 for FreeBSD
+  tags:
+    - postfwd2
+    - packages
+  stat: path={{ postfwd2_bin }}
+  register: check_postfwd2
+
 - name: fetch postfwd2 for FreeBSD
   tags:
     - postfwd2
@@ -19,6 +26,7 @@
     owner={{ postfwd2_default_owner }}
     group={{ postfwd2_default_group }}
     mode=0755
+  when: check_postfwd2.stat.exists == False
 
 - name: fix binary path for FreeBSD
   tags:
